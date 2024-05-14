@@ -1,35 +1,25 @@
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { CountContext } from "./context";
+import {
+  RecoilRoot,
+  useRecoilState,
+  useRecoilValue,
+  useSetRecoilState,
+} from "recoil";
+import { countAtom, evenSelector } from "./store/atoms/count";
 
-/*
-
-        CountApp
-
-          Count       
-
-  Buttons     CountRender
-
-*/
-
-function CountApp() {
-  const [count, setCount] = useState(0);
-
+function App() {
   return (
-    //TODO : wrap anyone that wants to use the teleported value insdide a provider
-
     <div>
-      <CountContext.Provider value={count}>
-        <SetCountContext.Provider value={setCount}>
-          <Count />
-        </SetCountContext.Provider>
-      </CountContext.Provider>
+      <RecoilRoot>
+        <Count />
+      </RecoilRoot>
     </div>
   );
 }
 
-//! -----------------------------
-
 function Count() {
+  console.log("re-render");
   return (
     <div>
       <CountRenderer />
@@ -38,23 +28,32 @@ function Count() {
   );
 }
 
-//! -----------------------------
-
 function CountRenderer() {
-  const count = useContext(CountContext);
-  return <div>{count}</div>;
+  const count = useRecoilValue(countAtom);
+
+  return (
+    <div>
+      <b>{count}</b>
+      <EvenCountRenderer />
+    </div>
+  );
 }
 
-//! -----------------------------
+function EvenCountRenderer() {
+  const isEven = useRecoilValue(evenSelector);
+
+  return <div>{isEven ? "It is even" : null}</div>;
+}
 
 function Buttons() {
-  const setCount = useContext(SetCountContext);
+  const setCount = useSetRecoilState(countAtom);
+  console.log("buttons re-rendererd");
 
   return (
     <div>
       <button
         onClick={() => {
-          setCount((prevCount) => prevCount + 1);
+          setCount((count) => count + 1);
         }}
       >
         Increase
@@ -62,7 +61,7 @@ function Buttons() {
 
       <button
         onClick={() => {
-          setCount((prevCount) => prevCount - 1);
+          setCount((count) => count - 1);
         }}
       >
         Decrease
@@ -71,4 +70,4 @@ function Buttons() {
   );
 }
 
-export default CountApp;
+export default App;
